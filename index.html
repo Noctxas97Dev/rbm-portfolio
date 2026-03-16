@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Raúl Bleda Martínez — Senior Game Developer</title>
+  <!-- Barlow Condensed as web fallback for Bahnschrift -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #09090b;
+      --bg2:      #0d0d10;
+      --bg3:      #111115;
+      --white:    #f0f0ee;
+      --off:      #a0a0a0;
+      --dim:      #555560;
+      --accent:   #e8e8e8;
+      --line:     rgba(240,240,238,0.1);
+      --linebright: rgba(240,240,238,0.22);
+      --glow-w:   0 0 30px rgba(240,240,238,0.08);
+    }
+
+    /* Bahnschrift is a Windows system font — falls back to Barlow Condensed */
+    :root { --font-display: 'Bahnschrift', 'Barlow Condensed', 'DIN Alternate', 'Arial Narrow', sans-serif; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Barlow', var(--font-display), sans-serif;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--white); }
+
+    /* ─── NOISE ─── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: .028;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ─── PROGRESS ─── */
+    #progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 1px;
+      background: var(--white);
+      z-index: 1000;
+      width: 0%;
+      transition: width .1s linear;
+      box-shadow: 0 0 8px rgba(255,255,255,0.6);
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5vw;
+      height: 58px;
+      background: rgba(9,9,11,0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--white);
+    }
+
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+
+    .nav-links a {
+      font-family: var(--font-display);
+      font-size: .75rem;
+      font-weight: 400;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      text-decoration: none;
+      transition: color .2s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0; right: 0;
+      height: 1px;
+      background: var(--white);
+      transform: scaleX(0);
+      transition: transform .25s;
+      transform-origin: left;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--white); }
+    .nav-links a:hover::after,
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .hamburger span { width: 24px; height: 1px; background: var(--white); transition: all .3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 58px 0 0;
+      background: var(--bg);
+      z-index: 90;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 3rem 5vw;
+      gap: 2.5rem;
+      border-top: 1px solid var(--line);
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .mobile-menu a:hover { opacity: .4; }
+
+    /* ─── HERO ─── */
+    #hero {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      padding-top: 58px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--linebright);
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8vw 5vw 6vw;
+      border-right: 1px solid var(--line);
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-display);
+      font-size: .72rem;
+      font-weight: 400;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: slideUp .7s .2s forwards;
+    }
+
+    .hero-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(4rem, 9vw, 9rem);
+      line-height: .92;
+      letter-spacing: -.02em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: slideUp .7s .35s forwards;
+    }
+
+    /* Glitch effect on name hover */
+    .hero-name:hover { animation: glitch .4s steps(2) infinite; }
+
+    @keyframes glitch {
+      0%   { text-shadow: 2px 0 #fff, -2px 0 #555; clip-path: inset(0 0 80% 0); }
+      25%  { text-shadow: -2px 0 #fff, 2px 0 #888; clip-path: inset(20% 0 50% 0); }
+      50%  { text-shadow: 2px 2px #fff, -2px -2px #333; clip-path: inset(50% 0 20% 0); }
+      75%  { text-shadow: -2px 0 #fff, 2px 0 #555; clip-path: inset(80% 0 0 0); }
+      100% { text-shadow: none; clip-path: none; }
+    }
+
+    .hero-name-sub {
+      font-family: var(--font-display);
+      font-weight: 200;
+      font-size: clamp(1.5rem, 3.5vw, 3.5rem);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--off);
+      line-height: 1.2;
+      margin-top: .6rem;
+      opacity: 0;
+      animation: slideUp .7s .5s forwards;
+    }
+
+    .hero-desc {
+      margin-top: 3rem;
+      font-size: .95rem;
+      line-height: 1.85;
+      color: var(--off);
+      max-width: 400px;
+      opacity: 0;
+      animation: slideUp .7s .65s forwards;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: slideUp .7s .8s forwards;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .7rem 2rem;
+      font-family: var(--font-display);
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--linebright);
+      color: var(--white);
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: color .3s;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--white);
+      transform: translateX(-101%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    .btn:hover { color: var(--bg); }
+    .btn:hover::before { transform: translateX(0); }
+    .btn span { position: relative; z-index: 1; }
+
+    .btn-fill { background: var(--white); color: var(--bg); border-color: var(--white); }
+    .btn-fill::before { background: #ccc; }
+    .btn-fill:hover { color: var(--bg); }
+
+    /* Hero right — big stats */
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 8vw 5vw 6vw;
+    }
+
+    .big-stat {
+      border-top: 1px solid var(--line);
+      padding: 2rem 0;
+      opacity: 0;
+      animation: slideUp .7s .9s forwards;
+    }
+
+    .big-stat-n {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3.5rem, 7vw, 7rem);
+      line-height: 1;
+      letter-spacing: -.03em;
+    }
+
+    .big-stat-l {
+      font-family: var(--font-display);
+      font-size: .7rem;
+      font-weight: 400;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-top: .3rem;
+    }
+
+    /* ─── MARQUEE ─── */
+    .marquee-wrap {
+      position: relative;
+      z-index: 2;
+      border-bottom: 1px solid var(--linebright);
+      border-top: 1px solid var(--linebright);
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 1.2rem 0;
+      background: var(--bg2);
+    }
+
+    .marquee-inner {
+      display: inline-block;
+      animation: marquee 22s linear infinite;
+    }
+
+    .marquee-inner span {
+      font-family: var(--font-display);
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--dim);
+      padding: 0 3rem;
+    }
+
+    .marquee-inner span::before {
+      content: '//';
+      margin-right: 1rem;
+      color: var(--linebright);
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── SECTION BASE ─── */
+    section { position: relative; z-index: 2; border-bottom: 1px solid var(--linebright); }
+
+    .section-header {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-num {
+      padding: 2.5rem 2rem 2.5rem 5vw;
+      font-family: var(--font-display);
+      font-size: .68rem;
+      font-weight: 400;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: var(--dim);
+      border-right: 1px solid var(--line);
+    }
+
+    .section-title {
+      padding: 2.5rem 5vw;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(1.8rem, 4vw, 3.5rem);
+      letter-spacing: -.01em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    /* ─── ABOUT ─── */
+    .about-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+    }
+
+    .about-sidebar {
+      border-right: 1px solid var(--line);
+      padding: 3rem 2rem 3rem 5vw;
+    }
+
+    .sidebar-block { margin-bottom: 2.2rem; }
+    .sidebar-block:last-child { margin-bottom: 0; }
+
+    .sidebar-label {
+      font-family: var(--font-display);
+      font-size: .63rem;
+      font-weight: 500;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: .5rem;
+    }
+
+    .sidebar-val {
+      font-family: var(--font-display);
+      font-size: .95rem;
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.6;
+    }
+
+    .about-text { padding: 3rem 5vw; max-width: 680px; }
+
+    .about-text p {
+      font-size: 1rem;
+      line-height: 1.9;
+      color: var(--off);
+      margin-bottom: 1.3rem;
+    }
+
+    .about-text p:last-child { margin-bottom: 0; }
+
+    /* ─── EXPERIENCE ─── */
+    .exp-item {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .5s, transform .5s;
+    }
+    .exp-item:last-child { border-bottom: none; }
+    .exp-item.visible { opacity: 1; transform: translateY(0); }
+
+    .exp-meta {
+      padding: 2.2rem 2rem 2.2rem 5vw;
+      border-right: 1px solid var(--line);
+    }
+
+    .exp-date {
+      font-family: var(--font-display);
+      font-size: .65rem;
+      font-weight: 400;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--dim);
+      display: block;
+      margin-bottom: .5rem;
+    }
+
+    .exp-company {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+
+    .exp-body {
+      padding: 2.2rem 5vw;
+      position: relative;
+      overflow: hidden;
+      transition: background .2s;
+    }
+
+    .exp-body::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--white);
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: transform .3s;
+    }
+
+    .exp-item:hover .exp-body::before { transform: scaleY(1); }
+    .exp-item:hover .exp-body { background: rgba(255,255,255,.025); }
+
+    .exp-role {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      margin-bottom: .6rem;
+    }
+
+    .exp-desc {
+      font-size: .88rem;
+      line-height: 1.8;
+      color: var(--off);
+      max-width: 560px;
+    }
+
+    /* ─── SKILLS ─── */
+    .skills-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+    }
+
+    .skills-sidebar { border-right: 1px solid var(--line); }
+
+    .skills-cat {
+      padding: 1.8rem 2rem 1.8rem 5vw;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .skills-cat:last-child { border-bottom: none; }
+    .skills-cat:hover, .skills-cat.active { background: rgba(255,255,255,.04); }
+
+    .skills-cat-label {
+      font-family: var(--font-display);
+      font-size: .68rem;
+      font-weight: 500;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--dim);
+      transition: color .15s;
+    }
+    .skills-cat:hover .skills-cat-label,
+    .skills-cat.active .skills-cat-label { color: var(--white); }
+
+    .skills-panel { padding: 3rem 5vw; }
+    .skills-group { display: none; }
+    .skills-group.active { display: block; }
+
+    .skills-group-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -.01em;
+      margin-bottom: 2rem;
+    }
+
+    .tags-wrap { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+    .tag {
+      font-family: var(--font-display);
+      font-size: .68rem;
+      font-weight: 500;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      padding: .45rem 1rem;
+      border: 1px solid var(--linebright);
+      color: var(--off);
+      transition: all .2s;
+      cursor: default;
+    }
+    .tag:hover { background: var(--white); color: var(--bg); border-color: var(--white); }
+
+    /* ─── EDUCATION ─── */
+    .edu-item {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .5s, transform .5s;
+    }
+    .edu-item:last-child { border-bottom: none; }
+    .edu-item.visible { opacity: 1; transform: translateY(0); }
+
+    .edu-meta {
+      padding: 2.2rem 2rem 2.2rem 5vw;
+      border-right: 1px solid var(--line);
+    }
+
+    .edu-date {
+      font-family: var(--font-display);
+      font-size: .65rem;
+      font-weight: 400;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .edu-body { padding: 2.2rem 5vw; }
+
+    .edu-degree {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      margin-bottom: .25rem;
+    }
+
+    .edu-school {
+      font-family: var(--font-display);
+      font-size: .75rem;
+      font-weight: 400;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: .5rem;
+    }
+
+    .edu-desc {
+      font-size: .85rem;
+      color: var(--off);
+      line-height: 1.75;
+    }
+
+    /* ─── CERTS ─── */
+    .certs-body {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .cert-item {
+      padding: 2.5rem 2rem;
+      border-right: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .5s, transform .5s, background .2s;
+    }
+    .cert-item:first-child { padding-left: 5vw; }
+    .cert-item:last-child { border-right: none; }
+    .cert-item.visible { opacity: 1; transform: translateY(0); }
+    .cert-item:hover { background: rgba(255,255,255,.03); }
+
+    .cert-num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: rgba(255,255,255,.07);
+      margin-bottom: 1rem;
+      line-height: 1;
+    }
+
+    .cert-name {
+      font-family: var(--font-display);
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: .3rem;
+      line-height: 1.4;
+    }
+
+    .cert-issuer {
+      font-family: var(--font-display);
+      font-size: .65rem;
+      font-weight: 400;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    /* ─── LANGUAGES ─── */
+    .lang-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+    }
+
+    .lang-sidebar {
+      border-right: 1px solid var(--line);
+      padding: 3rem 2rem 3rem 5vw;
+    }
+
+    .lang-sidebar p {
+      font-size: .85rem;
+      color: var(--off);
+      line-height: 1.75;
+    }
+
+    .lang-grid {
+      padding: 3rem 5vw;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .lang-item {
+      padding: 0 2.5rem 0 0;
+      border-right: 1px solid var(--line);
+      margin-right: 2.5rem;
+    }
+    .lang-item:last-child { border-right: none; margin-right: 0; }
+
+    .lang-flag { font-size: 2.2rem; display: block; margin-bottom: .8rem; }
+
+    .lang-name {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      display: block;
+      margin-bottom: .2rem;
+    }
+
+    .lang-level {
+      font-family: var(--font-display);
+      font-size: .65rem;
+      font-weight: 400;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    /* ─── CONTACT ─── */
+    .contact-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+    }
+
+    .contact-sidebar {
+      border-right: 1px solid var(--line);
+      padding: 3rem 2rem 3rem 5vw;
+    }
+
+    .contact-sidebar p {
+      font-size: .85rem;
+      color: var(--off);
+      line-height: 1.75;
+    }
+
+    .contact-right { padding: 3rem 5vw; }
+
+    .contact-row {
+      display: flex;
+      align-items: baseline;
+      gap: 2.5rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .4s, transform .4s;
+    }
+    .contact-row:first-child { border-top: 1px solid var(--line); }
+    .contact-row.visible { opacity: 1; transform: translateY(0); }
+
+    .contact-type {
+      font-family: var(--font-display);
+      font-size: .63rem;
+      font-weight: 500;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--dim);
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .contact-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      color: var(--white);
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+
+    .contact-val:hover { opacity: .4; }
+
+    /* ─── REFERENCES ─── */
+    .refs-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+    }
+
+    .refs-sidebar {
+      border-right: 1px solid var(--line);
+      padding: 3rem 2rem 3rem 5vw;
+    }
+
+    .refs-sidebar p {
+      font-size: .83rem;
+      color: var(--off);
+    }
+
+    .refs-grid {
+      padding: 3rem 5vw;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .ref-item {
+      padding: 0 2.5rem 0 0;
+      border-right: 1px solid var(--line);
+      margin-right: 2.5rem;
+    }
+    .ref-item:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+
+    .ref-name {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: .25rem;
+    }
+
+    .ref-role {
+      font-size: .78rem;
+      color: var(--off);
+      margin-bottom: .5rem;
+      line-height: 1.4;
+    }
+
+    .ref-email {
+      font-family: var(--font-display);
+      font-size: .7rem;
+      font-weight: 400;
+      color: var(--dim);
+      word-break: break-all;
+      letter-spacing: .04em;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      border-top: 1px solid var(--linebright);
+    }
+
+    .footer-left {
+      padding: 2rem 2rem 2rem 5vw;
+      border-right: 1px solid var(--line);
+      font-family: var(--font-display);
+      font-size: .78rem;
+      font-weight: 400;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .footer-right {
+      padding: 2rem 5vw;
+      font-family: var(--font-display);
+      font-size: .68rem;
+      font-weight: 400;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── STAGGER ─── */
+    .exp-item:nth-child(1)  { transition-delay: 0s; }
+    .exp-item:nth-child(2)  { transition-delay: .07s; }
+    .exp-item:nth-child(3)  { transition-delay: .14s; }
+    .exp-item:nth-child(4)  { transition-delay: .21s; }
+    .exp-item:nth-child(5)  { transition-delay: .28s; }
+    .exp-item:nth-child(6)  { transition-delay: .35s; }
+    .exp-item:nth-child(7)  { transition-delay: .42s; }
+    .exp-item:nth-child(8)  { transition-delay: .49s; }
+    .exp-item:nth-child(9)  { transition-delay: .56s; }
+    .exp-item:nth-child(10) { transition-delay: .63s; }
+    .edu-item:nth-child(1)  { transition-delay: 0s; }
+    .edu-item:nth-child(2)  { transition-delay: .1s; }
+    .edu-item:nth-child(3)  { transition-delay: .2s; }
+    .cert-item:nth-child(1) { transition-delay: 0s; }
+    .cert-item:nth-child(2) { transition-delay: .1s; }
+    .cert-item:nth-child(3) { transition-delay: .2s; }
+    .cert-item:nth-child(4) { transition-delay: .3s; }
+    .contact-row:nth-child(1) { transition-delay: 0s; }
+    .contact-row:nth-child(2) { transition-delay: .1s; }
+    .contact-row:nth-child(3) { transition-delay: .2s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 860px) {
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+
+      #hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-left { padding: 80px 24px 40px; border-right: none; border-bottom: 1px solid var(--line); }
+      .hero-right { padding: 40px 24px; display: grid; grid-template-columns: 1fr 1fr; }
+
+      .section-header { grid-template-columns: 80px 1fr; }
+      .section-num { padding: 1.8rem 1rem 1.8rem 24px; }
+      .section-title { padding: 1.8rem 24px; }
+
+      .about-body, .skills-body, .lang-body,
+      .contact-body, .refs-body, footer { grid-template-columns: 1fr; }
+
+      .about-sidebar, .skills-sidebar, .lang-sidebar,
+      .contact-sidebar, .refs-sidebar, .footer-left {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding: 2rem 24px;
+      }
+
+      .about-text, .skills-panel, .lang-grid,
+      .contact-right, .refs-grid, .footer-right { padding: 2rem 24px; }
+
+      .lang-grid { grid-template-columns: 1fr; }
+      .lang-item { border-right: none; border-bottom: 1px solid var(--line); padding: 1.2rem 0; margin-right: 0; }
+      .lang-item:last-child { border-bottom: none; }
+
+      .exp-item, .edu-item { grid-template-columns: 1fr; }
+      .exp-meta, .edu-meta { border-right: none; padding: 1.8rem 24px 0; }
+      .exp-body, .edu-body { padding: 1rem 24px 1.8rem; }
+
+      .certs-body { grid-template-columns: 1fr 1fr; }
+      .cert-item { padding: 2rem 1.5rem; }
+      .cert-item:first-child { padding-left: 24px; }
+      .cert-item:nth-child(2) { border-right: none; }
+      .cert-item:nth-child(3) { border-top: 1px solid var(--line); }
+      .cert-item:nth-child(4) { border-top: 1px solid var(--line); border-right: none; }
+
+      .refs-grid { grid-template-columns: 1fr; }
+      .ref-item { border-right: none; margin-right: 0; padding: 0 0 1.5rem; border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; }
+      .ref-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+      .footer-right { flex-direction: column; gap: .4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">RBM</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about" class="mobile-link">About</a>
+  <a href="#experience" class="mobile-link">Experience</a>
+  <a href="#skills" class="mobile-link">Skills</a>
+  <a href="#education" class="mobile-link">Education</a>
+  <a href="#contact" class="mobile-link">Contact</a>
+</div>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<section id="hero">
+  <div class="hero-left">
+    <div>
+      <p class="hero-eyebrow">Senior Game Developer · AI Game Tools · Unreal Engine Expert</p>
+      <h1 class="hero-name">Raúl<br>Bleda</h1>
+      <p class="hero-name-sub">Martínez</p>
+      <p class="hero-desc">29-year-old Senior Game Developer and Project Lead. Unreal Engine Gold Authorized Instructor by Epic Games. Expert in C++, Blueprints, VR and AI-driven development for PC and consoles.</p>
+    </div>
+    <div class="hero-cta">
+      <a href="#experience" class="btn"><span>Experience</span></a>
+      <a href="#contact" class="btn btn-fill"><span>Contact</span></a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="big-stat">
+      <div class="big-stat-n">5+</div>
+      <div class="big-stat-l">Years Unreal Engine</div>
+    </div>
+    <div class="big-stat">
+      <div class="big-stat-n">10+</div>
+      <div class="big-stat-l">Team Members Led</div>
+    </div>
+    <div class="big-stat">
+      <div class="big-stat-n">PS5</div>
+      <div class="big-stat-l">Console Titles</div>
+    </div>
+    <div class="big-stat">
+      <div class="big-stat-n">3</div>
+      <div class="big-stat-l">Languages Spoken</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <span>Unreal Engine 5</span><span>C++ Developer</span><span>AI Game Tools</span>
+    <span>Multiplayer</span><span>VR Development</span><span>Blueprints</span>
+    <span>GAS</span><span>Game Director</span><span>Epic Games Instructor</span>
+    <span>Motion Matching</span><span>Plugin Development</span><span>Gaussian Splatting</span>
+    <span>Unreal Engine 5</span><span>C++ Developer</span><span>AI Game Tools</span>
+    <span>Multiplayer</span><span>VR Development</span><span>Blueprints</span>
+    <span>GAS</span><span>Game Director</span><span>Epic Games Instructor</span>
+    <span>Motion Matching</span><span>Plugin Development</span><span>Gaussian Splatting</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ ABOUT ══════════════════════ -->
+<section id="about">
+  <div class="section-header">
+    <div class="section-num">01 — About</div>
+    <h2 class="section-title">Who I Am</h2>
+  </div>
+  <div class="about-body">
+    <div class="about-sidebar">
+      <div class="sidebar-block">
+        <p class="sidebar-label">Location</p>
+        <p class="sidebar-val">Spain</p>
+      </div>
+      <div class="sidebar-block">
+        <p class="sidebar-label">Email</p>
+        <p class="sidebar-val">rbleda36<br>@gmail.com</p>
+      </div>
+      <div class="sidebar-block">
+        <p class="sidebar-label">Phone</p>
+        <p class="sidebar-val">+34 645 670 814</p>
+      </div>
+      <div class="sidebar-block">
+        <p class="sidebar-label">Status</p>
+        <p class="sidebar-val">Open to<br>full-time roles</p>
+      </div>
+    </div>
+    <div class="about-text">
+      <p>I blend artistic vision with strong technical expertise to bring immersive worlds to life through a multidisciplinary approach. My experience spans Unreal Engine 4 & 5, VR, AI-driven development, and C++ programming, leading projects for PC and consoles (PS4/PS5) from concept to release.</p>
+      <p>I integrate artificial intelligence both in gameplay systems and development workflows — for smarter NPC behaviours, procedural content, and enhanced production pipelines within modern game development tools.</p>
+      <p>Beyond programming, I actively contribute to game design, storytelling, UX/UI, and 3D art, bridging the gap between technology and creative direction. As a creator and mentor, I guide teams and students, turning ambitious ideas into engaging interactive experiences. Fluent in Spanish, English, and Japanese.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ EXPERIENCE ══════════════════════ -->
+<section id="experience">
+  <div class="section-header">
+    <div class="section-num">02 — Experience</div>
+    <h2 class="section-title">Work History</h2>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Dec 2025 — Present</span>
+      <span class="exp-company">ShintTools</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">AI Game Tools Developer</div>
+      <p class="exp-desc">Division of Shinrai Interactive dedicated to AI automation and optimization tools for Unreal Engine and Unity. Research using Claude AI models, Unreal Engine AI C++ tools, Unity C#, and core Python engine development.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Feb 2024 — Present</span>
+      <span class="exp-company">Shinrai Interactive</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Game Director</div>
+      <p class="exp-desc">Leading creative and technical vision of a 10+ person dev team on <em>The White Sea</em>, an indie AA horror game for PC and Consoles. Unreal Engine C++, Blueprints. Scrum / sprint methodology.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Aug 2024 — Present</span>
+      <span class="exp-company">Epic Games</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Unreal Engine Gold Authorized Instructor</div>
+      <p class="exp-desc">Certified Unreal Engine Authorized Instructor by Epic Games. Teaching and mentoring with deep expertise in Unreal Engine — C++, Blueprints, 3D generalist workflows.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">May 2025 — Oct 2025</span>
+      <span class="exp-company">IRALTA VR</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Senior Unreal Tools Programmer</div>
+      <p class="exp-desc">C++ tools for spout streaming protocols in SkyJet VR (PC): JetPack simulator with multiplayer system in UE5. Plugin C++ Development, UMG C++, VR C++ Development. Scrum methodology.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Oct 2024 — Feb 2025</span>
+      <span class="exp-company">Boira Visuals</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Senior Unreal Engine Developer</div>
+      <p class="exp-desc">Implementing C++ and Blueprint digital twins with Unreal Engine 5. BP Gameplay programming, C++ Architecture development. Scrum / sprint methodology.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Nov 2023 — Jun 2025</span>
+      <span class="exp-company">Universal Arts School</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Unreal Engine Game Programming Professor</div>
+      <p class="exp-desc">Instructor/Professor in Studio Production & Master of video game programming with Unreal Engine using C++ & Blueprints.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Aug 2023 — Feb 2024</span>
+      <span class="exp-company">The Wise Dreams</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">AI Unreal Engine C++ Developer</div>
+      <p class="exp-desc">AI Researcher for developing a Gaussian Splatting plugin for UE5. Coordinating Unreal development with AI engineers. C++, Plugin development, AI development, Python scripts.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Mar 2023 — May 2023</span>
+      <span class="exp-company">NoxNoctis Studio</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Gameplay Programmer</div>
+      <p class="exp-desc">C++ and Blueprint Unreal Engine Programmer on OVRDARK (PC, PS5). UI, Gameplay BP, C++ development.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">Feb 2020 — Present</span>
+      <span class="exp-company">Independent</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Senior Unreal Engine Developer</div>
+      <p class="exp-desc">Game and software development projects. C++, BP, VR, AI. GAS, Multiplayer, Motion Matching, Behaviour Trees, Interfaces, Data Driven architecture.</p>
+    </div>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-meta">
+      <span class="exp-date">May 2021 — Dec 2022</span>
+      <span class="exp-company">Arisnova S.L</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-role">Unity C# Developer · C++ Engine Developer</div>
+      <p class="exp-desc">3D web development apps with Unity 3D (C#) and game engine development (C++). WebGL, JavaScript, backend development.</p>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══════════════════════ SKILLS ══════════════════════ -->
+<section id="skills">
+  <div class="section-header">
+    <div class="section-num">03 — Skills</div>
+    <h2 class="section-title">Technical Arsenal</h2>
+  </div>
+  <div class="skills-body">
+    <div class="skills-sidebar">
+      <div class="skills-cat active" data-group="engine"><div class="skills-cat-label">Core Engine</div></div>
+      <div class="skills-cat" data-group="ai"><div class="skills-cat-label">AI & Tools</div></div>
+      <div class="skills-cat" data-group="languages"><div class="skills-cat-label">Languages</div></div>
+      <div class="skills-cat" data-group="platforms"><div class="skills-cat-label">Platforms & VR</div></div>
+      <div class="skills-cat" data-group="tools"><div class="skills-cat-label">Frameworks & IDE</div></div>
+      <div class="skills-cat" data-group="design"><div class="skills-cat-label">3D & Design</div></div>
+    </div>
+    <div class="skills-panel">
+      <div class="skills-group active" id="group-engine">
+        <div class="skills-group-title">Core Engine</div>
+        <div class="tags-wrap">
+          <span class="tag">Unreal Engine 5</span><span class="tag">Unreal Engine 4</span>
+          <span class="tag">C++</span><span class="tag">Blueprints</span>
+          <span class="tag">GAS</span><span class="tag">Multiplayer</span>
+          <span class="tag">Motion Matching</span><span class="tag">Behaviour Trees</span>
+          <span class="tag">Data Driven</span><span class="tag">UMG</span>
+          <span class="tag">Plugin Development</span><span class="tag">Gameplay Framework</span>
+        </div>
+      </div>
+      <div class="skills-group" id="group-ai">
+        <div class="skills-group-title">AI & Tools</div>
+        <div class="tags-wrap">
+          <span class="tag">Claude AI</span><span class="tag">Gemini</span>
+          <span class="tag">Gaussian Splatting</span><span class="tag">AI Game Tools</span>
+          <span class="tag">NPC AI</span><span class="tag">Procedural Content</span>
+          <span class="tag">Python Scripts</span><span class="tag">AI Workflows</span>
+        </div>
+      </div>
+      <div class="skills-group" id="group-languages">
+        <div class="skills-group-title">Coding Languages</div>
+        <div class="tags-wrap">
+          <span class="tag">C++</span><span class="tag">C#</span>
+          <span class="tag">Python</span><span class="tag">JavaScript</span>
+          <span class="tag">HTML / CSS</span><span class="tag">Java</span>
+          <span class="tag">Perl</span><span class="tag">PHP</span>
+        </div>
+      </div>
+      <div class="skills-group" id="group-platforms">
+        <div class="skills-group-title">Platforms & VR</div>
+        <div class="tags-wrap">
+          <span class="tag">PC</span><span class="tag">PS5</span>
+          <span class="tag">PS4</span><span class="tag">VR</span>
+          <span class="tag">Android</span><span class="tag">iOS</span>
+          <span class="tag">WebGL</span><span class="tag">Linux</span><span class="tag">Windows</span>
+        </div>
+      </div>
+      <div class="skills-group" id="group-tools">
+        <div class="skills-group-title">Frameworks & IDE</div>
+        <div class="tags-wrap">
+          <span class="tag">Visual Studio</span><span class="tag">Rider</span>
+          <span class="tag">Git</span><span class="tag">Perforce</span>
+          <span class="tag">Angular</span><span class="tag">Flutter</span>
+          <span class="tag">Android Studio</span><span class="tag">Scrum</span>
+        </div>
+      </div>
+      <div class="skills-group" id="group-design">
+        <div class="skills-group-title">3D & Design</div>
+        <div class="tags-wrap">
+          <span class="tag">Blender</span><span class="tag">3Ds Max</span>
+          <span class="tag">Photoshop</span><span class="tag">Illustrator</span>
+          <span class="tag">UX / UI</span><span class="tag">Environment Design</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ EDUCATION ══════════════════════ -->
+<section id="education">
+  <div class="section-header">
+    <div class="section-num">04 — Education</div>
+    <h2 class="section-title">Academic Path</h2>
+  </div>
+
+  <div class="edu-item">
+    <div class="edu-meta"><span class="edu-date">Dec 2025 — Jun 2026</span></div>
+    <div class="edu-body">
+      <div class="edu-degree">Specialization in AI Game Development Tools</div>
+      <div class="edu-school">Claude (Anthropic)</div>
+      <p class="edu-desc">AI Research and development of AI Game development tools. Claude AI models, Unreal Engine AI C++ tools, Unity C#, Core Python engine development.</p>
+    </div>
+  </div>
+
+  <div class="edu-item">
+    <div class="edu-meta"><span class="edu-date">Dec 2020 — Dec 2022</span></div>
+    <div class="edu-body">
+      <div class="edu-degree">Master of Video Game Programming with Unreal Engine</div>
+      <div class="edu-school">Tokio School</div>
+      <p class="edu-desc">BP, C++, 3D Modeling tools, Profiling, Shading, Rendering.</p>
+    </div>
+  </div>
+
+  <div class="edu-item">
+    <div class="edu-meta"><span class="edu-date">Sep 2019 — May 2021</span></div>
+    <div class="edu-body">
+      <div class="edu-degree">Professional Grade of Web Development</div>
+      <div class="edu-school">I.E.S Conselleria</div>
+      <p class="edu-desc">Java, JS, PHP, HTML, CSS.</p>
+    </div>
+  </div>
+
+  <!-- Certs sub-section -->
+  <div style="border-top:1px solid var(--linebright)">
+    <div class="section-header">
+      <div class="section-num">— Courses</div>
+      <h2 class="section-title" style="font-size:1.6rem; padding:2rem 5vw;">Certifications &amp; Licenses</h2>
+    </div>
+    <div class="certs-body">
+      <div class="cert-item">
+        <div class="cert-num">01</div>
+        <div class="cert-name">Unreal Authorized Gold Instructor</div>
+        <div class="cert-issuer">Epic Games</div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-num">02</div>
+        <div class="cert-name">Unreal C++ Professional Course</div>
+        <div class="cert-issuer">Epic Games · Tom Looman</div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-num">03</div>
+        <div class="cert-name">Unreal C++ Multiplayer</div>
+        <div class="cert-issuer">Udemy</div>
+      </div>
+      <div class="cert-item">
+        <div class="cert-num">04</div>
+        <div class="cert-name">Narrative Design for Video Games</div>
+        <div class="cert-issuer">Domestika</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ LANGUAGES ══════════════════════ -->
+<section id="languages">
+  <div class="section-header">
+    <div class="section-num">05 — Languages</div>
+    <h2 class="section-title">Communication</h2>
+  </div>
+  <div class="lang-body">
+    <div class="lang-sidebar">
+      <p>Fluent across three languages — bringing a global creative perspective to every project.</p>
+    </div>
+    <div class="lang-grid">
+      <div class="lang-item">
+        <span class="lang-flag">🇪🇸</span>
+        <span class="lang-name">Spanish</span>
+        <span class="lang-level">Native</span>
+      </div>
+      <div class="lang-item">
+        <span class="lang-flag">🇬🇧</span>
+        <span class="lang-name">English</span>
+        <span class="lang-level">Fluent</span>
+      </div>
+      <div class="lang-item">
+        <span class="lang-flag">🇯🇵</span>
+        <span class="lang-name">Japanese</span>
+        <span class="lang-level">Intermediate</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ CONTACT ══════════════════════ -->
+<section id="contact">
+  <div class="section-header">
+    <div class="section-num">06 — Contact</div>
+    <h2 class="section-title">Get In Touch</h2>
+  </div>
+  <div class="contact-body">
+    <div class="contact-sidebar">
+      <p>Open to full-time positions, collaborations, and interesting projects. Let's build something extraordinary together.</p>
+    </div>
+    <div class="contact-right">
+      <div class="contact-row">
+        <span class="contact-type">Phone</span>
+        <a href="tel:+34645670814" class="contact-val">+34 645 670 814</a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-type">Email</span>
+        <a href="mailto:rbleda36@gmail.com" class="contact-val">rbleda36@gmail.com</a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-type">LinkedIn</span>
+        <a href="https://linkedin.com" target="_blank" class="contact-val">View Profile →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ REFERENCES ══════════════════════ -->
+<section>
+  <div class="section-header">
+    <div class="section-num">— Refs</div>
+    <h2 class="section-title">References</h2>
+  </div>
+  <div class="refs-body">
+    <div class="refs-sidebar">
+      <p>Available upon request.</p>
+    </div>
+    <div class="refs-grid">
+      <div class="ref-item">
+        <div class="ref-name">Judit Bleda Martínez</div>
+        <div class="ref-role">Sales Manager & Project Manager</div>
+        <div class="ref-email">juditbm@outlook.es</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Rafa Costa</div>
+        <div class="ref-role">Art Director</div>
+        <div class="ref-email">rafa.costa.sculpt@gmail.com</div>
+      </div>
+      <div class="ref-item">
+        <div class="ref-name">Jorge Rodríguez García</div>
+        <div class="ref-role">Senior Unreal Programmer</div>
+        <div class="ref-email">jorgerodrigar2703@gmail.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">Raúl Bleda Martínez — 2026</div>
+  <div class="footer-right">
+    <span>Senior Game Developer · AI Game Tools · Unreal Engine Expert</span>
+    <span>Spain</span>
+  </div>
+</footer>
+
+<script>
+// Progress bar
+const bar = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  bar.style.width = (window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100) + '%';
+});
+
+// Scroll reveal
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.exp-item, .edu-item, .cert-item, .contact-row').forEach(el => io.observe(el));
+
+// Skills tabs
+document.querySelectorAll('.skills-cat').forEach(cat => {
+  cat.addEventListener('click', () => {
+    document.querySelectorAll('.skills-cat').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.skills-group').forEach(g => g.classList.remove('active'));
+    cat.classList.add('active');
+    document.getElementById('group-' + cat.dataset.group).classList.add('active');
+  });
+});
+
+// Hamburger
+const hb = document.getElementById('hamburger');
+const mm = document.getElementById('mobileMenu');
+hb.addEventListener('click', () => { hb.classList.toggle('open'); mm.classList.toggle('open'); });
+document.querySelectorAll('.mobile-link').forEach(a => {
+  a.addEventListener('click', () => { hb.classList.remove('open'); mm.classList.remove('open'); });
+});
+
+// Active nav
+const sections = document.querySelectorAll('section[id]');
+const navAs = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) cur = s.id; });
+  navAs.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+});
+</script>
+</body>
+</html>
